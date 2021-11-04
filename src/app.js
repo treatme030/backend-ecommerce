@@ -1,7 +1,10 @@
 require('dotenv').config();
-import express from 'express';
 import mongoose from 'mongoose';
-import product from './routes/productRoute';
+import Koa from 'koa';
+import Router from 'koa-router';
+import bodyParser from 'koa-bodyparser';
+
+import api from './api';
 
 const { PORT, MONGO_URI } = process.env;
 
@@ -15,10 +18,18 @@ mongoose
     console.error(e)
 })
 
-const app = express();
-app.use(express.json());
+const app = new Koa();
+const router = new Router();
 
-app.use("/api/v1", product);
+//api 라우터 설정
+router.use('/api', api.routes());
+
+//라우터 적용 전에 bodyParser 적용
+app.use(bodyParser());
+
+//app 인스턴스에 라우터 적용 
+app.use(router.routes()).use(router.allowedMethods());
+
 
 const port = PORT || 4000;
 app.listen(port, () => {

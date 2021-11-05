@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const UserSchema = new Schema({
     profile: {
@@ -62,6 +63,19 @@ UserSchema.statics.findByEmailOrUsername = function(username, email){
 //해당 모델에서 전달된 email 있는지 찾는 메서드
 UserSchema.statics.findByEmail = function(email){
     return this.findOne({ email });
+}
+
+//토근 만드는 메서드
+UserSchema.methods.generateToken = function(){
+    const token = jwt.sign(
+        {
+            _id: this._id,
+            profile: this.profile,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' },
+    )
+    return token;
 }
 
 const User = mongoose.model('User', UserSchema);

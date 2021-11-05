@@ -37,6 +37,14 @@ export const register = async ctx => {
         await user.setPassword(password);
         await user.save();
         ctx.body = user.serialize(); //password 제거하고 응답 보내기
+
+        //토큰 생성
+        const token = user.generateToken();
+        //쿠키 설정
+        ctx.cookies.set('access_token', token, {
+            maxAge: 1000 * 60 * 60 * 24 * 7,
+            httpOnly: true,
+        })
     } catch(e){
         ctx.throw(500, e);
     }
@@ -71,6 +79,13 @@ export const login = async ctx => {
             return;
         }
         ctx.body = user.serialize();
+        //토큰 생성
+        const token = user.generateToken();
+        //쿠키 설정
+        ctx.cookies.set('access_token', token, {
+            maxAge: 1000 * 60 * 60 * 24 * 7,
+            httpOnly: true,
+        })
     } catch(e){
         ctx.throw(500, e);
     }
@@ -82,5 +97,7 @@ export const check = async ctx => {}
 //로그아웃
 //POST --> /api/auth/logout
 export const logout = async ctx => {
-
+    //access_token 값을 넣어주지 않으면 됨
+    ctx.cookies.set('access_token');
+    ctx.status = 204;
 }

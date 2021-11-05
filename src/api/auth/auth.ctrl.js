@@ -91,8 +91,17 @@ export const login = async ctx => {
     }
 }
 
-//로그인 상태 확인
-export const check = async ctx => {}
+//로그인된 유저의 상태 확인
+//GET --> /api/auth/check
+//jwtMiddleware에서 ctx.state.user에 로그인된 유저 정보 넣어줌 
+export const check = async ctx => {
+    const { user } = ctx.state;
+    if(!user){
+        ctx.status = 401;
+        return;
+    }
+    ctx.body = user;
+}
 
 //로그아웃
 //POST --> /api/auth/logout

@@ -24,7 +24,7 @@ export const getProductById = async (ctx, next) => {
 }
 
 //모든 상품 불러오기
-//GET --> /api/products?keyword=&category=&page=
+//GET --> /api/products?keyword=&category=&price=&rating=&page=
 export const list = async ctx => {
     //query는 문자열로 숫자로 변환, 값이 주어지지 않았다면 1을 기본으로 사용
     const page = parseInt(ctx.query.page || '1')
@@ -33,11 +33,13 @@ export const list = async ctx => {
         return;
     }
 
-    const { keyword, category } = ctx.query;
+    const { keyword, category, price, rating } = ctx.query;
     //keyword 값이 유효하면 객체 안에 넣고, 그렇지 않으면 넣지 않음
     const query = {
         ...( keyword ? { name: keyword } : {}),
         ...( category ? { category: category } : {}),
+        ...( price ? { price: price } : {}),
+        ...( rating ? { rating: rating } : {}),
     }
     console.log(query)
     try {

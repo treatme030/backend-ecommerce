@@ -59,5 +59,10 @@ UserSchema.statics.findByEmailOrUsername = function(username, email){
     })
 }
 
+//해당 모델에서 전달된 email 있는지 찾는 메서드
+UserSchema.statics.findByEmail = function(email){
+    return this.findOne({ email });
+}
+
 const User = mongoose.model('User', UserSchema);
 export default User;

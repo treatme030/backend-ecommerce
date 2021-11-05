@@ -42,8 +42,39 @@ export const register = async ctx => {
     }
 }
 
-//로그인
-export const login = async ctx => {}
+//이메일 로그인
+//POST --> /api/auth/login
+export const login = async ctx => {
+    //데이터 검증
+    const schema = Joi.object().keys({
+        email: Joi.string().email().required(),
+        password: Joi.string().required(),
+    })
+    const result = schema.validate(ctx.request.body);
+    //검증 실패시 
+    if(result.error){
+        ctx.status = 400;
+        return;
+    }
+    const { email, password } = ctx.request.body;
+    try {
+        const user = await User.findByEmail(email);
+        //유저가 존재하지 않으면, 
+        if(!user){
+            ctx.status = 401;
+            return;
+        }
+        //비밀번호가 일치하지 않으면,
+        const valid = await user.checkPassword(password);
+        if(!valid){
+            ctx.status = 401;
+            return;
+        }
+        ctx.body = user.serialize();
+    } catch(e){
+        ctx.throw(500, e);
+    }
+}
 
 //로그인 상태 확인
 export const check = async ctx => {}

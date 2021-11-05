@@ -24,11 +24,29 @@ export const getProductById = async (ctx, next) => {
 }
 
 //모든 상품 불러오기
-//GET --> /api/products
+//GET --> /api/products?keyword=&category=&page=
 export const list = async ctx => {
+    //query는 문자열로 숫자로 변환, 값이 주어지지 않았다면 1을 기본으로 사용
+    const page = parseInt(ctx.query.page || '1')
+    if(page < 1){
+        ctx.status = 400;
+        return;
+    }
+
+    const { keyword, category } = ctx.query;
+    //keyword 값이 유효하면 객체 안에 넣고, 그렇지 않으면 넣지 않음
+    const query = {
+        ...( keyword ? { name: keyword } : {}),
+        ...( category ? { category: category } : {}),
+    }
+    console.log(query)
     try {
-        //find() 함수를 호출한 후에 exec()를 붙여 주어야 서버에 쿼리를 요청함
-        const products = await Product.find().exec();
+        //quer 값에 따른 상품 불러오기
+        const products = await Product.find(query)
+        .sort({ _id: -1 }) //내림차순으로 정렬
+        .limit(10)//보이는 개수 제한 
+        .skip((page - 1) * 10) //해당 개수를 제외하고 그 다음 데이터를 불러옴
+        .exec();//find() 함수를 호출한 후에 exec()를 붙여 주어야 서버에 쿼리를 요청함
         ctx.body = products;
     } catch(e){
         ctx.throw(500, e);

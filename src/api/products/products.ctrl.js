@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Joi from "joi";
 import Product from '../../models/product';
 
 const { ObjectId } = mongoose.Types;
@@ -58,7 +59,35 @@ export const list = async ctx => {
 //상품 등록하기
 //POST --> /api/products
 export const create = async ctx => {
-    console.log(ctx.request.body)
+    //데이터 검사
+    const schema = Joi.object().keys({
+        name: Joi.string().required(),
+        description: Joi.string().required(),
+        price: Joi.number().required(),
+        images: Joi.array().items(
+            Joi.object({
+                public_id: Joi.string().required(),
+                url: Joi.string().required(),
+            })
+        ),
+        category: Joi.string().required(),
+        stock: Joi.number().required(),
+        reviews: Joi.array().items(
+            Joi.object({
+                name: Joi.string().required(),
+                rating: Joi.number().required(),
+                comment: Joi.string().required() 
+            })
+        )
+    })
+    //검증하고 나서 검증 실패인 경우 에러 처리
+    const result = schema.validate(ctx.request.body);
+    if (result.error) {
+        ctx.status = 400;
+        ctx.body = result.error;
+        return;
+    }
+    
     const { name, description, price, images, category, stock, reviews } = ctx.request.body;
     const product = new Product({//모델 객체를 생성하고, 요청 받은 값 넣어주기
         name,
@@ -82,6 +111,35 @@ export const create = async ctx => {
 //PATCH --> api/products/:id
 export const update = async ctx => {
     const { id } = ctx.params;
+    //데이터 검사, 업데이트 때는 required()는 작성하지 않기
+    const schema = Joi.object().keys({
+        name: Joi.string(),
+        description: Joi.string(),
+        price: Joi.number(),
+        images: Joi.array().items(
+            Joi.object({
+                public_id: Joi.string(),
+                url: Joi.string(),
+            })
+        ),
+        category: Joi.string(),
+        stock: Joi.number(),
+        reviews: Joi.array().items(
+            Joi.object({
+                name: Joi.string(),
+                rating: Joi.number(),
+                comment: Joi.string() 
+            })
+        )
+    })
+    //검증하고 나서 검증 실패인 경우 에러 처리
+    const result = schema.validate(ctx.request.body);
+    if (result.error) {
+        ctx.status = 400;
+        ctx.body = result.error;
+        return;
+    }
+
     try {
         const product = await Product.findByIdAndUpdate(id, ctx.request.body, {
             new: true, //true:업데이트된 데이터 반환, false:업데이트되기 전 데이터 반환 

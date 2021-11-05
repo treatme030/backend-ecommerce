@@ -78,7 +78,7 @@ export const create = async ctx => {
                 rating: Joi.number().required(),
                 comment: Joi.string().required() 
             })
-        )
+        ),
     })
     //검증하고 나서 검증 실패인 경우 에러 처리
     const result = schema.validate(ctx.request.body);
@@ -100,7 +100,7 @@ export const create = async ctx => {
     })
     try {  
         await product.save();//데이터베이스에 저장
-        ctx.body = product;     
+        ctx.body = product;  
     } catch(e){
         console.log(e)
         ctx.throw(500, e);
